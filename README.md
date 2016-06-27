@@ -1,4 +1,4 @@
-# Asuner
+# Asunr
 
 Short for *A* *S*imple *Un*trusted Code *R*unner
 

@@ -10,7 +10,7 @@
 #include <sys/types.h>
 
 #define ss(c) SCMP_SYS(c)
-const int safe_calls[] = {ss(brk), ss(arch_prctl), ss(mmap), ss(uname), ss(exit), ss(exit_group), ss(lseek)};
+const int safe_calls[] = {ss(brk), ss(arch_prctl), ss(mmap), ss(uname), ss(exit), ss(exit_group), ss(lseek), ss(mprotect)};
 #undef ss
 
 const int n_safe_calls = sizeof(safe_calls) / sizeof(int);
@@ -82,9 +82,11 @@ int run_sandboxed(const char *program,
   if (pid < 0) return -1;
   else if (pid > 0) {
     /* Parent process */
+    if (input_fd >= 0 && -1 == close(input_fd)) die();
+    if (output_fd >= 0 && -1 == close(output_fd)) die();
     int status;
     struct rusage ru;
-    if(-1 == wait4(pid, &status, 0, &ru)) return -1;
+    if (-1 == wait4(pid, &status, 0, &ru)) return -1;
     *maxrss = ru.ru_maxrss;
     *cputime =
       (ru.ru_stime.tv_sec + ru.ru_utime.tv_sec) * 1000
